@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "curios",
+  "version": "${version}",
+  "name": "Curios API",
+  "description": "Fabric 1.21.1 port of the Curios slot API. Datapacks and item tags from Curios 9.5.1 work here. This is not a loader connector.",
+  "authors": ["TheIllusiveC4", "Nergan"],
+  "contact": {
+    "homepage": "https://github.com/Nergan/curios-api-port-mod",
+    "issues": "https://github.com/Nergan/curios-api-port-mod/issues",
+    "sources": "https://github.com/Nergan/curios-api-port-mod"
+  },
+  "license": "LGPL-3.0-or-later",
+  "icon": "assets/curios/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.curios.mod.CuriosMod"],
+    "client": ["com.curios.mod.client.CuriosClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabric-api": "*",
+    "fabric-language-kotlin": ">=1.13.2+kotlin.2.1.20"
+  }
+}
