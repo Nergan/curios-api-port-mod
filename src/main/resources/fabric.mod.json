@@ -11,6 +11,7 @@
     "sources": "https://github.com/Nergan/curios-api-port-mod"
   },
   "license": "LGPL-3.0-or-later",
+  "accessWidener": "curios.accesswidener",
   "icon": "assets/curios/icon.png",
   "environment": "*",
   "entrypoints": {

@@ -14,7 +14,7 @@ Artifacts 13.2.4 для Fabric по-прежнему включает спосо
 
 ## Загрузки
 
-GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.0.jar`.
+GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.1.jar`.
 
 `*-sources.jar` в релиз не входит и в `mods` не кладётся.
 

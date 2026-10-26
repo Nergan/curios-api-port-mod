@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack
 import top.theillusivec4.curios.api.ICuriosItemHandler
 import top.theillusivec4.curios.api.SlotContext
 import top.theillusivec4.curios.api.type.capability.ICurio
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler
 import java.util.Optional
 
 class CuriosInventory {
@@ -96,9 +98,26 @@ data class SavedGroup(val key: String, val items: List<ItemStack>)
 fun context(entity: LivingEntity, ref: SlotRef): SlotContext =
     SlotContext(ref.id, entity, ref.index, ref.cosmetic, !ref.cosmetic)
 
-fun handler(inventory: CuriosInventory): ICuriosItemHandler = object : ICuriosItemHandler {
+fun handler(inventory: CuriosInventory): ICuriosItemHandler = object :
+    ICuriosItemHandler,
+    top.theillusivec4.curios.api.type.capability.ICuriosItemHandler {
     override fun equipped(): List<ItemStack> = inventory.all()
+
     override fun isEquipped(predicate: (ItemStack) -> Boolean): Boolean = inventory.all().any(predicate)
+
+    override fun getCurios(): Map<String, ICurioStacksHandler> =
+        inventory.groups().associate { group -> group.key to StackHandler(group.items) }
+}
+
+private class StackHandler(items: List<ItemStack>) : ICurioStacksHandler {
+    private val stacks = DynamicStacks(items)
+    override fun getStacks(): IDynamicStackHandler = stacks
+}
+
+private class DynamicStacks(private val items: List<ItemStack>) : IDynamicStackHandler {
+    override fun getSlots(): Int = items.size
+
+    override fun getStackInSlot(slot: Int): ItemStack = items.getOrElse(slot) { ItemStack.EMPTY }
 }
 
 fun optionalHandler(inventory: CuriosInventory?): Optional<ICuriosItemHandler> =

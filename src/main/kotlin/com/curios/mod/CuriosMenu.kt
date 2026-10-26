@@ -1,7 +1,9 @@
 package com.curios.mod
 
+import com.mojang.datafixers.util.Pair as MojangPair
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
@@ -48,7 +50,9 @@ class CurioContainer(
         setChanged()
     }
 
-    override fun setChanged() {}
+    override fun setChanged() {
+        owner.setAttached(CuriosMod.INVENTORY, curios)
+    }
 
     override fun stillValid(player: Player): Boolean = player === owner
 
@@ -66,21 +70,12 @@ class CuriosMenu(
 
     init {
         val curios = CurioContainer(playerInventory.player, CuriosMod.inventory(playerInventory.player), layout)
-        var x = 8
-        var y = 18
-        var column = 0
         for (index in layout.indices) {
+            val (x, y) = curioSlotPosition(index, 0)
             addSlot(CurioSlot(curios, index, x, y))
-            column++
-            x += 18
-            if (column == 9) {
-                column = 0
-                x = 8
-                y += 18
-            }
         }
         curioCount = layout.size
-        val playerY = y + 14
+        val playerY = CURIO_TOP + CURIO_VISIBLE_ROWS * 18 + 14
         for (row in 0 until 3) {
             for (col in 0 until 9) {
                 addSlot(Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, playerY + row * 18))
@@ -91,10 +86,7 @@ class CuriosMenu(
         }
     }
 
-    fun panelHeight(): Int {
-        val rows = if (layout.isEmpty()) 1 else (layout.size + 8) / 9
-        return 18 + rows * 18 + 14 + 76 + 8
-    }
+    fun panelHeight(): Int = CURIO_TOP + CURIO_VISIBLE_ROWS * 18 + 14 + 76 + 8
 
     override fun quickMoveStack(player: Player, index: Int): ItemStack {
         val slot = slots[index]
@@ -130,6 +122,24 @@ class CurioSlot(container: CurioContainer, index: Int, x: Int, y: Int) : Slot(co
     }
 
     override fun getMaxStackSize(stack: ItemStack): Int = 1
+
+    override fun getNoItemIcon(): MojangPair<ResourceLocation, ResourceLocation>? {
+        val icon = if (ref.cosmetic) {
+            "curios:slot/empty_cosmetic_slot"
+        } else {
+            CuriosRuntime.loaded.slots[ref.id]?.icon ?: "curios:slot/empty_curio_slot"
+        }
+        val sprite = ResourceLocation.tryParse(icon) ?: return null
+        return MojangPair.of(ResourceLocation.withDefaultNamespace("textures/atlas/gui.png"), sprite)
+    }
+}
+
+const val CURIO_VISIBLE_ROWS = 7
+const val CURIO_TOP = 18
+
+fun curioSlotPosition(index: Int, scroll: Int): Pair<Int, Int> {
+    val row = index - scroll
+    return if (row in 0 until CURIO_VISIBLE_ROWS) 8 to (CURIO_TOP + row * 18) else -2000 to -2000
 }
 
 object CuriosLayout {

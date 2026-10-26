@@ -14,7 +14,7 @@ Fabric 1.21.1 only. There is no NeoForge build in this repository.
 
 ## Downloads
 
-GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.0.jar`.
+GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.1.jar`.
 
 `*-sources.jar` is not part of the release and does not go in `mods`.
 

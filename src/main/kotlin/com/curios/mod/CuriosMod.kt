@@ -2,7 +2,9 @@ package com.curios.mod
 
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType
+import net.minecraft.network.codec.ByteBufCodecs
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -44,7 +46,9 @@ class CuriosMod : ModInitializer {
 
     companion object {
         val INVENTORY: AttachmentType<CuriosInventory> = AttachmentRegistry.create(id("inventory")) { builder ->
-            builder.initializer { CuriosInventory() }.persistent(CuriosInventory.CODEC)
+            builder.initializer { CuriosInventory() }
+                .persistent(CuriosInventory.CODEC)
+                .syncWith(ByteBufCodecs.fromCodecWithRegistries(CuriosInventory.CODEC), AttachmentSyncPredicate.all())
         }
 
         val MENU: ExtendedScreenHandlerType<CuriosMenu, List<SlotRef>> = ExtendedScreenHandlerType(
@@ -100,4 +104,5 @@ private fun drop(player: ServerPlayer, source: net.minecraft.world.damagesource.
             }
         }
     }
+    player.setAttached(CuriosMod.INVENTORY, inventory)
 }

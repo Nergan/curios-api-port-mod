@@ -21,6 +21,10 @@ kotlin {
     jvmToolchain(21)
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/curios.accesswidener")
+}
+
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
