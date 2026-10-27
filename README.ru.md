@@ -14,11 +14,13 @@ Artifacts 13.2.4 для Fabric по-прежнему включает спосо
 
 ## Загрузки
 
-GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.1.jar`.
+GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.2.jar`.
+
+Тот же jar — пакет McnCDN `curios-api-port-mod`, слот `jar`, версия `1.0.2`.
 
 `*-sources.jar` в релиз не входит и в `mods` не кладётся.
 
-На McnCDN и Modrinth этот порт не публикуется.
+На Modrinth этот порт не публикуется.
 
 ## Требования
 

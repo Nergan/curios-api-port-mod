@@ -27,7 +27,6 @@ object CuriosRuntime {
         for (name in names) {
             val slot = loaded.slots[name] ?: continue
             repeat(slot.size) { index -> refs += SlotRef(name, index, false) }
-            if (slot.addCosmetic) repeat(slot.size) { index -> refs += SlotRef(name, index, true) }
         }
         return refs
     }

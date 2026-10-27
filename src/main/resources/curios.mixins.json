@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.curios.mod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "InventoryScreenMixin",
+    "CreativeCuriosButtonMixin",
+    "ContainerScreenAccess"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

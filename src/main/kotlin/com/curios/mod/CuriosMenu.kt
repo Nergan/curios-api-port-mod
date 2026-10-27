@@ -8,15 +8,17 @@ import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.inventory.InventoryMenu
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import top.theillusivec4.curios.api.type.capability.ICurio
 
 class CurioContainer(
     val owner: Player,
-    private val curios: CuriosInventory,
     val layout: List<SlotRef>,
 ) : Container {
+    private val curios: CuriosInventory
+        get() = CuriosMod.inventory(owner)
     override fun getContainerSize(): Int = layout.size
 
     override fun isEmpty(): Boolean = layout.all { curios.stack(it).isEmpty }
@@ -24,29 +26,23 @@ class CurioContainer(
     override fun getItem(slot: Int): ItemStack = curios.stack(layout[slot])
 
     override fun removeItem(slot: Int, amount: Int): ItemStack {
-        val stack = getItem(slot)
-        if (stack.isEmpty) return ItemStack.EMPTY
-        val split = stack.split(amount)
-        setItem(slot, stack)
-        return split
+        val current = getItem(slot)
+        if (current.isEmpty || amount <= 0) return ItemStack.EMPTY
+        val taken = current.copyWithCount(minOf(amount, current.count))
+        val remainder = current.copy()
+        remainder.shrink(taken.count)
+        setItem(slot, if (remainder.isEmpty) ItemStack.EMPTY else remainder)
+        return taken
     }
 
     override fun removeItemNoUpdate(slot: Int): ItemStack {
-        val stack = getItem(slot)
-        setItem(slot, ItemStack.EMPTY)
-        return stack
+        val taken = getItem(slot).copy()
+        if (!taken.isEmpty) setItem(slot, ItemStack.EMPTY)
+        return taken
     }
 
     override fun setItem(slot: Int, stack: ItemStack) {
-        val ref = layout[slot]
-        val previous = curios.stack(ref)
-        curios.set(ref, stack)
-        if (!ItemStack.matches(previous, stack)) {
-            val slotContext = context(owner, ref)
-            (previous.item as? ICurio)?.onUnequip(slotContext, stack)
-            (stack.item as? ICurio)?.onEquip(slotContext, previous)
-            curios.refreshAttributes(owner, CuriosRuntime.slotsFor(owner.type, entityTags(owner.type)))
-        }
+        CuriosTrinkets.change(owner, layout[slot], stack)
         setChanged()
     }
 
@@ -69,36 +65,41 @@ class CuriosMenu(
     val curioCount: Int
 
     init {
-        val curios = CurioContainer(playerInventory.player, CuriosMod.inventory(playerInventory.player), layout)
+        val curios = CurioContainer(playerInventory.player, layout)
         for (index in layout.indices) {
-            val (x, y) = curioSlotPosition(index, 0)
+            val (x, y) = curioInventoryPosition(index, layout.size)
             addSlot(CurioSlot(curios, index, x, y))
         }
         curioCount = layout.size
-        val playerY = CURIO_TOP + CURIO_VISIBLE_ROWS * 18 + 14
         for (row in 0 until 3) {
             for (col in 0 until 9) {
-                addSlot(Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, playerY + row * 18))
+                addSlot(Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18))
             }
         }
         for (col in 0 until 9) {
-            addSlot(Slot(playerInventory, col, 8 + col * 18, playerY + 58))
+            addSlot(Slot(playerInventory, col, 8 + col * 18, 142))
         }
     }
 
     fun panelHeight(): Int = CURIO_TOP + CURIO_VISIBLE_ROWS * 18 + 14 + 76 + 8
 
     override fun quickMoveStack(player: Player, index: Int): ItemStack {
-        val slot = slots[index]
+        val slot = slots.getOrNull(index) ?: return ItemStack.EMPTY
         if (!slot.hasItem()) return ItemStack.EMPTY
+        if (index < curioCount) {
+            val moving = slot.item.copy()
+            val taken = moving.copy()
+            slot.set(ItemStack.EMPTY)
+            if (!moveItemStackTo(moving, curioCount, slots.size, true)) {
+                slot.set(moving)
+                return ItemStack.EMPTY
+            }
+            if (!moving.isEmpty) slot.set(moving)
+            return taken
+        }
         val original = slot.item.copy()
         val stack = slot.item
-        val moved = if (index < curioCount) {
-            moveItemStackTo(stack, curioCount, slots.size, true)
-        } else {
-            moveItemStackTo(stack, 0, curioCount, false)
-        }
-        if (!moved) return ItemStack.EMPTY
+        if (!moveItemStackTo(stack, 0, curioCount, false)) return ItemStack.EMPTY
         if (stack.isEmpty) slot.set(ItemStack.EMPTY) else slot.setChanged()
         return original
     }
@@ -123,6 +124,8 @@ class CurioSlot(container: CurioContainer, index: Int, x: Int, y: Int) : Slot(co
 
     override fun getMaxStackSize(stack: ItemStack): Int = 1
 
+    override fun isActive(): Boolean = x > -1000
+
     override fun getNoItemIcon(): MojangPair<ResourceLocation, ResourceLocation>? {
         val icon = if (ref.cosmetic) {
             "curios:slot/empty_cosmetic_slot"
@@ -130,7 +133,7 @@ class CurioSlot(container: CurioContainer, index: Int, x: Int, y: Int) : Slot(co
             CuriosRuntime.loaded.slots[ref.id]?.icon ?: "curios:slot/empty_curio_slot"
         }
         val sprite = ResourceLocation.tryParse(icon) ?: return null
-        return MojangPair.of(ResourceLocation.withDefaultNamespace("textures/atlas/gui.png"), sprite)
+        return MojangPair.of(InventoryMenu.BLOCK_ATLAS, sprite)
     }
 }
 

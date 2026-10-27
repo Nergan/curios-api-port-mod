@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.minecraft.network.codec.ByteBufCodecs
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.event.player.UseItemCallback
+import net.minecraft.world.InteractionResultHolder
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
@@ -21,6 +23,9 @@ import net.minecraft.server.packs.PackType
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import dev.emi.trinkets.api.TrinketEnums
+import dev.emi.trinkets.api.TrinketItem
+import dev.emi.trinkets.api.TrinketsApi
 import top.theillusivec4.curios.api.CuriosApi
 import top.theillusivec4.curios.api.type.capability.ICurio
 
@@ -42,6 +47,15 @@ class CuriosMod : ModInitializer {
             inventoryOf = { entity -> optionalHandler(entity.getAttached(INVENTORY)) },
             curioOf = { stack -> stack.item as? ICurio },
         )
+        CuriosTrinkets.install()
+        UseItemCallback.EVENT.register { player, world, hand ->
+            val stack = player.getItemInHand(hand)
+            if (!world.isClientSide && TrinketsApi.getTrinket(stack.item).canEquipFromUse(stack, player) && TrinketItem.equipItem(player, stack)) {
+                InteractionResultHolder.success(stack)
+            } else {
+                InteractionResultHolder.pass(stack)
+            }
+        }
     }
 
     companion object {
@@ -79,12 +93,27 @@ private fun open(player: ServerPlayer) {
 private fun tick(player: ServerPlayer) {
     val inventory = CuriosMod.inventory(player)
     val layout = CuriosMod.layout(player)
-    inventory.ensure(layout)
+    val dropped = inventory.ensure(layout)
+    if (dropped.isNotEmpty()) {
+        for (stack in dropped) player.drop(stack, false)
+        player.setAttached(CuriosMod.INVENTORY, inventory)
+    }
     for (ref in layout) {
         val stack = inventory.stack(ref)
         (stack.item as? ICurio)?.curioTick(context(player, ref))
+        if (!stack.isEmpty) {
+            TrinketsApi.getTrinket(stack.item).tick(stack, CuriosTrinkets.reference(player, ref), player)
+        }
     }
 }
+
+private fun trinketDropRule(player: ServerPlayer, stack: ItemStack, ref: SlotRef): ICurio.DropRule =
+    when (TrinketsApi.getTrinket(stack.item).getDropRule(stack, CuriosTrinkets.reference(player, ref), player)) {
+        TrinketEnums.DropRule.DESTROY -> ICurio.DropRule.DESTROY
+        TrinketEnums.DropRule.ALWAYS_KEEP -> ICurio.DropRule.ALWAYS_KEEP
+        TrinketEnums.DropRule.ALWAYS_DROP -> ICurio.DropRule.ALWAYS_DROP
+        TrinketEnums.DropRule.DEFAULT -> ICurio.DropRule.DEFAULT
+    }
 
 private fun drop(player: ServerPlayer, source: net.minecraft.world.damagesource.DamageSource) {
     val inventory = player.getAttached(CuriosMod.INVENTORY) ?: return
@@ -94,7 +123,7 @@ private fun drop(player: ServerPlayer, source: net.minecraft.world.damagesource.
         val stack = inventory.stack(ref)
         if (stack.isEmpty) continue
         val rule = (stack.item as? ICurio)?.getDropRule(context(player, ref), source, recentlyHit)
-            ?: ICurio.DropRule.DEFAULT
+            ?: trinketDropRule(player, stack, ref)
         when (rule) {
             ICurio.DropRule.ALWAYS_KEEP -> Unit
             ICurio.DropRule.DESTROY -> inventory.set(ref, ItemStack.EMPTY)

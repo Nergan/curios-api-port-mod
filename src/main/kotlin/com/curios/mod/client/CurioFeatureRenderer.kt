@@ -2,7 +2,9 @@ package com.curios.mod.client
 
 import com.curios.mod.CuriosMod
 import com.curios.mod.CuriosRuntime
+import com.curios.mod.CuriosTrinkets
 import com.curios.mod.entityTags
+import dev.emi.trinkets.api.client.TrinketRendererRegistry
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
 import net.minecraft.client.Minecraft
@@ -37,6 +39,25 @@ class CurioFeatureRenderer(
         for ((index, ref) in refs.withIndex()) {
             val stack = inventory.stack(ref)
             if (stack.isEmpty) continue
+            val custom = TrinketRendererRegistry.getRenderer(stack.item)
+            if (custom.isPresent) {
+                custom.get().render(
+                    stack,
+                    CuriosTrinkets.reference(entity, ref),
+                    parentModel,
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    entity,
+                    limbSwing,
+                    limbSwingAmount,
+                    partialTick,
+                    ageInTicks,
+                    netHeadYaw,
+                    headPitch,
+                )
+                continue
+            }
             poseStack.pushPose()
             place(entity, ref.id, ref.cosmetic, poseStack)
             renderer.renderStatic(

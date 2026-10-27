@@ -11,9 +11,13 @@
     "sources": "https://github.com/Nergan/curios-api-port-mod"
   },
   "license": "LGPL-3.0-or-later",
+  "provides": ["trinkets"],
   "accessWidener": "curios.accesswidener",
   "icon": "assets/curios/icon.png",
   "environment": "*",
+  "mixins": [
+    "curios.mixins.json"
+  ],
   "entrypoints": {
     "main": ["com.curios.mod.CuriosMod"],
     "client": ["com.curios.mod.client.CuriosClient"]

@@ -43,6 +43,17 @@ class CuriosFilesTest {
     }
 
     @Test
+    fun trinketNamesMatchArtifactsAndBackpacks() {
+        assertEquals("head" to "hat", trinketGroupAndName("head", 0))
+        assertEquals("chest" to "necklace", trinketGroupAndName("necklace", 0))
+        assertEquals("legs" to "belt", trinketGroupAndName("belt", 0))
+        assertEquals("feet" to "shoes", trinketGroupAndName("feet", 0))
+        assertEquals("chest" to "back", trinketGroupAndName("back", 0))
+        assertEquals("hand" to "glove", trinketGroupAndName("hands", 0))
+        assertEquals("offhand" to "glove", trinketGroupAndName("hands", 1))
+    }
+
+    @Test
     fun replaceClearsEarlierEntitySlots() {
         val loaded = loadCurios(
             listOf(SlotFile("curios", "ring", """{"order":1}"""), SlotFile("curios", "head", """{"order":2}""")),

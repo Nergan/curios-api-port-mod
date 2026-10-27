@@ -2,7 +2,7 @@
 
 Порт Curios API на Fabric 1.21.1. Только Fabric. Второй загрузчик не добавлять. `mod_id` — `curios`. Пакет своего кода — `com.curios.mod`. Публичный API остаётся в `top.theillusivec4.curios.api`, чтобы чужой код находил те же имена.
 
-Лицензия исходника — LGPL-3.0-or-later. На MPL-2.0 не перелицензировать. На McnCDN и Modrinth не публиковать. Игрок качает GitHub Release `minecraft-1.21.1-fabric`.
+Лицензия исходника — LGPL-3.0-or-later. На MPL-2.0 не перелицензировать. На Modrinth не публиковать. GitHub Release `minecraft-1.21.1-fabric` и публичный пакет McnCDN `curios-api-port-mod` (слот `jar`, версия равна `mod_version`) держат один и тот же jar. Это не пакет `modpacks-curios`: тот остаётся пропатченным curiosfabric и в сборку не входит. Опубликованный номер CDN не перезаписывается, поэтому следующий jar требует больший `mod_version`.
 
 `org.gradle.jvmargs` остаётся `-Xmx2G`. Wrapper не добавлять. Сборка — Gradle 8.11 и JDK 21.
 

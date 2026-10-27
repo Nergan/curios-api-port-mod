@@ -146,6 +146,20 @@ fun normalizeEntity(raw: String): String {
     return if (raw.startsWith("#")) "#$id" else id
 }
 
+/**
+ * Names Fabric mods already use. Artifacts and Sophisticated Backpacks talk to Trinkets
+ * groups, while the stored slot is still the Curios id.
+ */
+fun trinketGroupAndName(curiosId: String, index: Int): Pair<String, String> = when (curiosId) {
+    "head" -> "head" to "hat"
+    "necklace" -> "chest" to "necklace"
+    "belt" -> "legs" to "belt"
+    "feet" -> "feet" to "shoes"
+    "back" -> "chest" to "back"
+    "hands" -> if (index <= 0) "hand" to "glove" else "offhand" to "glove"
+    else -> "curios" to curiosId
+}
+
 fun validatorAllows(validators: List<String>, slotId: String, itemTags: Set<String>): Boolean {
     if (validators.isEmpty()) return false
     return validators.all { validator ->
