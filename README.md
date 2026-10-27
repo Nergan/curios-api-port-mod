@@ -16,11 +16,9 @@ Fabric 1.21.1 only. There is no NeoForge build in this repository.
 
 GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.2.jar`.
 
-The same jar is McnCDN package `curios-api-port-mod`, slot `jar`, version `1.0.2`.
-
 `*-sources.jar` is not part of the release and does not go in `mods`.
 
-This port is not published to Modrinth.
+This port is not published to Modrinth or Mikchan CDN.
 
 ## Requirements
 

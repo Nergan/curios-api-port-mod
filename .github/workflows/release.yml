@@ -33,7 +33,7 @@ jobs:
           test -n "$jar"
           name=$(basename "$jar")
           zip -j all-jars.zip "$jar"
-          notes="Fabric 1.21.1 port of the Curios API. Datapacks and item tags match Curios 9.5.1. This is not a connector. The same jar is McnCDN package curios-api-port-mod. It is not published to Modrinth."
+          notes="Fabric 1.21.1 port of the Curios API. Datapacks and item tags match Curios 9.5.1. This is not a connector. It is not published to Modrinth or Mikchan CDN."
           if gh release view "$tag" >/dev/null 2>&1; then
             while read -r asset; do
               case "$asset" in
@@ -51,31 +51,3 @@ jobs:
               --title "curios api for minecraft 1.21.1 fabric" \
               --notes "$notes"
           fi
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Publish the jar to McnCDN
-        env:
-          MCNS_WORKER_TOKEN: ${{ secrets.MCNS_WORKER_TOKEN }}
-          MCNS_WORKER_ID: ${{ secrets.MCNS_WORKER_ID }}
-          MCNS_WORKER_KEY: ${{ secrets.MCNS_WORKER_KEY }}
-          MCNS_MOD_VERSION: "1.0.2"
-          MCNS_COMMIT: ${{ github.sha }}
-          MCNS_REF: ${{ github.ref }}
-        run: |
-          set -euo pipefail
-          version=$(python3 -c "import pathlib; print([line.split('=',1)[1].strip() for line in pathlib.Path('gradle.properties').read_text().splitlines() if line.startswith('mod_version=')][0])")
-          jar=$(find build/libs -name 'curios-fabric-1.21.1-*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n 1)
-          code=$(curl -sS -o /dev/null -w "%{http_code}" "https://cdn.mikchan.net/v1/packages/curios-api-port-mod/versions/${version}")
-          if [[ "$code" == "200" ]]; then
-            echo "McnCDN curios-api-port-mod@${version} is already published."
-            exit 0
-          fi
-          if [[ -z "${MCNS_WORKER_TOKEN}" && ( -z "${MCNS_WORKER_ID}" || -z "${MCNS_WORKER_KEY}" ) ]]; then
-            echo "McnCDN credentials are not configured on this repository." >&2
-            exit 1
-          fi
-          node scripts/mcns-ensure-package.mjs curios-api-port-mod jar "Curios API Fabric" "curios-fabric-1.21.1-[version].jar"
-          node scripts/mcns-release.mjs curios-api-port-mod "$version" "jar=${jar}"
