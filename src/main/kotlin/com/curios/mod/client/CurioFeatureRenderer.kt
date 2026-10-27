@@ -1,9 +1,7 @@
 package com.curios.mod.client
 
 import com.curios.mod.CuriosMod
-import com.curios.mod.CuriosRuntime
 import com.curios.mod.CuriosTrinkets
-import com.curios.mod.entityTags
 import dev.emi.trinkets.api.client.TrinketRendererRegistry
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Axis
@@ -34,11 +32,9 @@ class CurioFeatureRenderer(
     ) {
         if (entity.isInvisible) return
         val inventory = entity.getAttached(CuriosMod.INVENTORY) ?: return
-        val refs = CuriosRuntime.slotsFor(entity.type, entityTags(entity.type))
         val renderer = Minecraft.getInstance().itemRenderer
-        for ((index, ref) in refs.withIndex()) {
-            val stack = inventory.stack(ref)
-            if (stack.isEmpty) continue
+        for ((index, equipped) in inventory.worn().withIndex()) {
+            val (ref, stack) = equipped
             val custom = TrinketRendererRegistry.getRenderer(stack.item)
             if (custom.isPresent) {
                 custom.get().render(

@@ -29,6 +29,12 @@ class CuriosLayoutTest {
     }
 
     @Test
+    fun storedKeyKeepsTheSlotAndTheCosmeticFlag() {
+        assertEquals(SlotRef("necklace", 1, false), slotRef("necklace", 1))
+        assertEquals(SlotRef("head", 0, true), slotRef("head#cosmetic", 0))
+    }
+
+    @Test
     fun overflowSlotsStayOffTheInventory() {
         assertEquals(-2000 to -2000, curioInventoryPosition(24, 30))
         assertEquals(0, curioPanelWidth(0))

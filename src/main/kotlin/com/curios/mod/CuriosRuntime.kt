@@ -44,6 +44,12 @@ data class SlotRef(val id: String, val index: Int, val cosmetic: Boolean) {
     fun key(): String = if (cosmetic) "$id#cosmetic" else id
 }
 
+fun slotRef(key: String, index: Int): SlotRef {
+    val cosmetic = key.endsWith("#cosmetic")
+    val id = if (cosmetic) key.removeSuffix("#cosmetic") else key
+    return SlotRef(id, index, cosmetic)
+}
+
 class CuriosReload : IdentifiableResourceReloadListener {
     override fun getFabricId(): ResourceLocation = ResourceLocation.fromNamespaceAndPath("curios", "data")
 

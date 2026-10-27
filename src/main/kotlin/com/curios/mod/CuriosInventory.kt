@@ -33,6 +33,16 @@ class CuriosInventory {
 
     fun groups(): List<SavedGroup> = stacks.map { (key, items) -> SavedGroup(key, items.map { it.copy() }) }
 
+fun worn(): List<Pair<SlotRef, ItemStack>> {
+    val worn = mutableListOf<Pair<SlotRef, ItemStack>>()
+    for ((key, items) in stacks) {
+        for ((index, stack) in items.withIndex()) {
+            if (!stack.isEmpty) worn += slotRef(key, index) to stack
+        }
+    }
+    return worn
+}
+
     fun ensure(refs: List<SlotRef>): List<ItemStack> {
         val needed = refs.groupBy { it.key() }.mapValues { entry -> entry.value.maxOf { it.index } + 1 }
         val dropped = mutableListOf<ItemStack>()
