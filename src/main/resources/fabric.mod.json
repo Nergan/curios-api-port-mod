@@ -16,7 +16,8 @@
   "icon": "assets/curios/icon.png",
   "environment": "*",
   "mixins": [
-    "curios.mixins.json"
+    "curios.mixins.json",
+    "curios.compat.mixins.json"
   ],
   "entrypoints": {
     "main": ["com.curios.mod.CuriosMod"],

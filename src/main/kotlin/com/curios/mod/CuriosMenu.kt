@@ -5,12 +5,15 @@ import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.Container
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.InventoryMenu
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents
+import net.minecraft.world.item.enchantment.EnchantmentHelper
 import top.theillusivec4.curios.api.type.capability.ICurio
 
 class CurioContainer(
@@ -71,6 +74,18 @@ class CuriosMenu(
             addSlot(CurioSlot(curios, index, x, y))
         }
         curioCount = layout.size
+        val player = playerInventory.player
+        val armor = listOf(
+            EquipmentSlot.HEAD to InventoryMenu.EMPTY_ARMOR_SLOT_HELMET,
+            EquipmentSlot.CHEST to InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
+            EquipmentSlot.LEGS to InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS,
+            EquipmentSlot.FEET to InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS,
+        )
+        for ((index, entry) in armor.withIndex()) {
+            val (equipment, icon) = entry
+            addSlot(ArmorEquipmentSlot(playerInventory, player, equipment, 39 - index, 8, 8 + index * 18, icon))
+        }
+        addSlot(OffhandEquipmentSlot(playerInventory, player, 40, 77, 62))
         for (row in 0 until 3) {
             for (col in 0 until 9) {
                 addSlot(Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18))
@@ -86,11 +101,13 @@ class CuriosMenu(
     override fun quickMoveStack(player: Player, index: Int): ItemStack {
         val slot = slots.getOrNull(index) ?: return ItemStack.EMPTY
         if (!slot.hasItem()) return ItemStack.EMPTY
+        val equipmentEnd = curioCount + VANILLA_EQUIPMENT_COUNT
+        val inventoryStart = equipmentEnd
         if (index < curioCount) {
             val moving = slot.item.copy()
             val taken = moving.copy()
             slot.set(ItemStack.EMPTY)
-            if (!moveItemStackTo(moving, curioCount, slots.size, true)) {
+            if (!moveItemStackTo(moving, inventoryStart, slots.size, true)) {
                 slot.set(moving)
                 return ItemStack.EMPTY
             }
@@ -99,7 +116,13 @@ class CuriosMenu(
         }
         val original = slot.item.copy()
         val stack = slot.item
-        if (!moveItemStackTo(stack, 0, curioCount, false)) return ItemStack.EMPTY
+        val moved = if (index < equipmentEnd) {
+            moveItemStackTo(stack, inventoryStart, slots.size, true)
+        } else {
+            moveItemStackTo(stack, curioCount, equipmentEnd, false) ||
+                moveItemStackTo(stack, 0, curioCount, false)
+        }
+        if (!moved) return ItemStack.EMPTY
         if (stack.isEmpty) slot.set(ItemStack.EMPTY) else slot.setChanged()
         return original
     }
@@ -139,6 +162,51 @@ class CurioSlot(container: CurioContainer, index: Int, x: Int, y: Int) : Slot(co
 
 const val CURIO_VISIBLE_ROWS = 7
 const val CURIO_TOP = 18
+const val VANILLA_EQUIPMENT_COUNT = 5
+
+private class ArmorEquipmentSlot(
+    inventory: Container,
+    private val owner: Player,
+    private val equipment: EquipmentSlot,
+    index: Int,
+    x: Int,
+    y: Int,
+    private val emptyIcon: ResourceLocation,
+) : Slot(inventory, index, x, y) {
+    override fun getMaxStackSize(): Int = 1
+
+    override fun mayPlace(stack: ItemStack): Boolean = owner.getEquipmentSlotForItem(stack) == equipment
+
+    override fun mayPickup(player: Player): Boolean {
+        val worn = item
+        val locked = !worn.isEmpty && EnchantmentHelper.has(worn, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
+        return (!locked || player.isCreative) && super.mayPickup(player)
+    }
+
+    override fun setByPlayer(stack: ItemStack, previous: ItemStack) {
+        owner.onEquipItem(equipment, stack, previous)
+        super.setByPlayer(stack, previous)
+    }
+
+    override fun getNoItemIcon(): MojangPair<ResourceLocation, ResourceLocation> =
+        MojangPair.of(InventoryMenu.BLOCK_ATLAS, emptyIcon)
+}
+
+private class OffhandEquipmentSlot(
+    inventory: Container,
+    private val owner: Player,
+    index: Int,
+    x: Int,
+    y: Int,
+) : Slot(inventory, index, x, y) {
+    override fun setByPlayer(stack: ItemStack, previous: ItemStack) {
+        owner.onEquipItem(EquipmentSlot.OFFHAND, stack, previous)
+        super.setByPlayer(stack, previous)
+    }
+
+    override fun getNoItemIcon(): MojangPair<ResourceLocation, ResourceLocation> =
+        MojangPair.of(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD)
+}
 
 fun curioSlotPosition(index: Int, scroll: Int): Pair<Int, Int> {
     val row = index - scroll

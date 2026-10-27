@@ -14,7 +14,7 @@ Fabric 1.21.1 only. There is no NeoForge build in this repository.
 
 ## Downloads
 
-GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.3.jar`. The same release is mirrored to GitLab [naragan/curios-api-port-mod](https://gitlab.com/naragan/curios-api-port-mod/-/releases/minecraft-1.21.1-fabric). The files there link to the GitHub downloads.
+GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.4.jar`. The same release is mirrored to GitLab [naragan/curios-api-port-mod](https://gitlab.com/naragan/curios-api-port-mod/-/releases/minecraft-1.21.1-fabric). The files there link to the GitHub downloads.
 
 `*-sources.jar` is not part of the release and does not go in `mods`.
 

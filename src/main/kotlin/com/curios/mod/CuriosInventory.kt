@@ -43,6 +43,8 @@ fun worn(): List<Pair<SlotRef, ItemStack>> {
     return worn
 }
 
+fun storedRefs(): List<SlotRef> = worn().map { it.first }
+
     fun ensure(refs: List<SlotRef>): List<ItemStack> {
         val needed = refs.groupBy { it.key() }.mapValues { entry -> entry.value.maxOf { it.index } + 1 }
         val dropped = mutableListOf<ItemStack>()

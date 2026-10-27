@@ -33,8 +33,12 @@ class CuriosMod : ModInitializer {
     override fun onInitialize() {
         Registry.register(BuiltInRegistries.MENU, id("curios"), MENU)
         PayloadTypeRegistry.playC2S().register(OpenCuriosPayload.TYPE, OpenCuriosPayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(ClearCuriosPayload.TYPE, ClearCuriosPayload.CODEC)
         ServerPlayNetworking.registerGlobalReceiver(OpenCuriosPayload.TYPE) { _, context ->
             context.server().execute { open(context.player()) }
+        }
+        ServerPlayNetworking.registerGlobalReceiver(ClearCuriosPayload.TYPE) { _, context ->
+            context.server().execute { clearCurios(context.player()) }
         }
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(CuriosReload())
         ServerTickEvents.END_WORLD_TICK.register { world ->
@@ -75,6 +79,14 @@ class CuriosMod : ModInitializer {
         fun inventory(player: Player): CuriosInventory = player.getAttachedOrCreate(INVENTORY)
 
         fun layout(player: Player): List<SlotRef> = CuriosRuntime.slotsFor(player.type, entityTags(player.type))
+    }
+}
+
+private fun clearCurios(player: ServerPlayer) {
+    if (!player.isCreative) return
+    val inventory = player.getAttached(CuriosMod.INVENTORY) ?: return
+    for (ref in inventory.storedRefs()) {
+        CuriosTrinkets.change(player, ref, ItemStack.EMPTY)
     }
 }
 

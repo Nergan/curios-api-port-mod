@@ -1,6 +1,7 @@
 package com.curios.mod.client
 
 import com.curios.mod.CuriosMod
+import com.curios.mod.CuriosRuntime
 import com.curios.mod.CuriosMenu
 import com.curios.mod.OpenCuriosPayload
 import com.curios.mod.curioColumns
@@ -33,6 +34,7 @@ import org.lwjgl.glfw.GLFW
 
 class CuriosClient : ClientModInitializer {
     override fun onInitializeClient() {
+        CuriosRuntime.loadBundledData()
         net.minecraft.client.gui.screens.MenuScreens.register(CuriosMod.MENU, ::CuriosScreen)
         val mapping = KeyBindingHelper.registerKeyBinding(
             KeyMapping(

@@ -29,6 +29,13 @@ class CuriosLayoutTest {
     }
 
     @Test
+    fun equippedStackStaysVisibleWhenTheDatapackListIsEmpty() {
+        val stored = listOf(SlotRef("back", 0, false))
+        assertEquals(stored, visibleSlotRefs(emptyList(), stored))
+        assertEquals(stored, visibleSlotRefs(stored, stored))
+    }
+
+    @Test
     fun storedKeyKeepsTheSlotAndTheCosmeticFlag() {
         assertEquals(SlotRef("necklace", 1, false), slotRef("necklace", 1))
         assertEquals(SlotRef("head", 0, true), slotRef("head#cosmetic", 0))

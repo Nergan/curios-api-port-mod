@@ -16,7 +16,9 @@ object CuriosTrinkets {
     fun install() {
         TrinketsApi.bind(object : CurioSlots {
             override fun slots(entity: LivingEntity): List<CurioSlotView> {
-                return CuriosRuntime.slotsFor(entity.type, entityTags(entity.type)).map { ref ->
+                val data = CuriosRuntime.slotsFor(entity.type, entityTags(entity.type))
+                val stored = entity.getAttached(CuriosMod.INVENTORY)?.storedRefs().orEmpty()
+                return visibleSlotRefs(data, stored).map { ref ->
                     val (group, name) = trinketGroupAndName(ref.id, ref.index)
                     CurioSlotView(ref.id, ref.index, group, name)
                 }

@@ -5,6 +5,7 @@
   "client": [
     "InventoryScreenMixin",
     "CreativeCuriosButtonMixin",
+    "CreativeDestroyCuriosMixin",
     "ContainerScreenAccess"
   ],
   "injectors": {
