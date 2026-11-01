@@ -7,21 +7,21 @@ import org.spongepowered.asm.mixin.gen.Accessor
 
 @Mixin(AbstractContainerScreen::class)
 interface ContainerScreenAccess {
-    @Accessor("field_2776", remap = false)
+    @Accessor("leftPos")
     fun getCuriosLeft(): Int
 
-    @Accessor("field_2776", remap = false)
+    @Accessor("leftPos")
     fun setCuriosLeft(value: Int)
 
-    @Accessor("field_2800", remap = false)
+    @Accessor("topPos")
     fun getCuriosTop(): Int
 
-    @Accessor("field_2800", remap = false)
+    @Accessor("topPos")
     fun setCuriosTop(value: Int)
 
-    @Accessor("field_2779", remap = false)
+    @Accessor("imageHeight")
     fun getCuriosImageHeight(): Int
 
-    @Accessor("field_2797", remap = false)
+    @Accessor("menu")
     fun getCuriosMenu(): AbstractContainerMenu
 }

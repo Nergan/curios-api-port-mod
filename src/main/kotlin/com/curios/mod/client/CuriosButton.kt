@@ -18,6 +18,7 @@ private val CURIOS_BUTTON = WidgetSprites(
 /**
  * The original Curios control: a 10×10 icon at the top-left of the inventory.
  * Survival sits at gui + (28, 10). Creative inventory tab sits at gui + (75, 8).
+ * The same icon on the curios screen goes back to the vanilla inventory.
  */
 class CuriosButton(private val parent: AbstractContainerScreen<*>) : ImageButton(
     0,
@@ -25,7 +26,7 @@ class CuriosButton(private val parent: AbstractContainerScreen<*>) : ImageButton
     10,
     10,
     CURIOS_BUTTON,
-    { _ -> openFrom(parent) },
+    { _ -> if (parent is CuriosScreen) returnToInventory() else openFrom(parent) },
     Component.translatable("curios.screen"),
 ) {
     override fun renderWidget(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {

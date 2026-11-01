@@ -4,7 +4,7 @@
 
 Порт API слотов Curios на Fabric 1.21.1. Мод читает те же датапаки `curios/slots` и `curios/entities` и те же теги предметов `curios`, что Curios 9.5.1. Это мод Fabric, не коннектор NeoForge и не миксин поверх чужого jar Curios.
 
-Идентификатор мода — `curios`. Предмет со тегом `curios:<слот>` или `curios:curio` встаёт в слот, если валидатор слота — `curios:tag`. Слоты открываются клавишей G.
+Идентификатор мода — `curios`. Предмет со тегом `curios:<слот>` или `curios:curio` встаёт в слот, если валидатор слота — `curios:tag`. Слоты открываются клавишей G или кнопкой над моделью игрока в инвентаре. Та же кнопка и та же клавиша в окне слотов возвращают в обычный инвентарь, а предмет на курсоре остаётся в руке.
 
 Artifacts 13.2.4 для Fabric по-прежнему включает способности через Accessories или Trinkets. Этот порт даёт таким предметам слот и не запускает эффекты артефактов.
 
@@ -14,7 +14,7 @@ Artifacts 13.2.4 для Fabric по-прежнему включает спосо
 
 ## Загрузки
 
-GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.4.jar`. Тот же релиз зеркалируется на GitLab [naragan/curios-api-port-mod](https://gitlab.com/naragan/curios-api-port-mod/-/releases/minecraft-1.21.1-fabric). Файлы там — ссылки на скачивание с GitHub.
+GitHub Release `minecraft-1.21.1-fabric`: `curios-fabric-1.21.1-1.0.5.jar`. Тот же релиз зеркалируется на GitLab [naragan/curios-api-port-mod](https://gitlab.com/naragan/curios-api-port-mod/-/releases/minecraft-1.21.1-fabric). Файлы там — ссылки на скачивание с GitHub.
 
 `*-sources.jar` в релиз не входит и в `mods` не кладётся.
 

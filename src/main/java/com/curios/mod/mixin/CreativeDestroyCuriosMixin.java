@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CreativeModeInventoryScreen.class)
 abstract class CreativeDestroyCuriosMixin {
-    @Shadow(remap = false)
-    private Slot field_2889;
+    @Shadow
+    private Slot destroyItemSlot;
 
-    @Inject(method = "method_2383", at = @At("HEAD"), remap = false)
+    @Inject(method = "slotClicked", at = @At("HEAD"))
     private void clearCurios(Slot slot, int slotId, int button, ClickType action, CallbackInfo callback) {
-        if (slot == null || slot != field_2889 || action != ClickType.QUICK_MOVE) {
+        if (slot == null || slot != destroyItemSlot || action != ClickType.QUICK_MOVE) {
             return;
         }
         ClientPlayNetworking.send(ClearCuriosPayload.INSTANCE);

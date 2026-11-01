@@ -34,8 +34,12 @@ class CuriosMod : ModInitializer {
         Registry.register(BuiltInRegistries.MENU, id("curios"), MENU)
         PayloadTypeRegistry.playC2S().register(OpenCuriosPayload.TYPE, OpenCuriosPayload.CODEC)
         PayloadTypeRegistry.playC2S().register(ClearCuriosPayload.TYPE, ClearCuriosPayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(OpenInventoryPayload.TYPE, OpenInventoryPayload.CODEC)
         ServerPlayNetworking.registerGlobalReceiver(OpenCuriosPayload.TYPE) { _, context ->
             context.server().execute { open(context.player()) }
+        }
+        ServerPlayNetworking.registerGlobalReceiver(OpenInventoryPayload.TYPE) { _, context ->
+            context.server().execute { backToInventory(context.player()) }
         }
         ServerPlayNetworking.registerGlobalReceiver(ClearCuriosPayload.TYPE) { _, context ->
             context.server().execute { clearCurios(context.player()) }
@@ -90,16 +94,28 @@ private fun clearCurios(player: ServerPlayer) {
     }
 }
 
+/** The stack on the cursor follows the player between the two screens, as in the original Curios. */
 private fun open(player: ServerPlayer) {
     val layout = CuriosMod.layout(player)
     val dropped = CuriosMod.inventory(player).ensure(layout)
     for (stack in dropped) player.drop(stack, false)
+    val carried = player.containerMenu.carried
+    player.containerMenu.carried = ItemStack.EMPTY
     player.openMenu(object : ExtendedScreenHandlerFactory<List<SlotRef>> {
         override fun getScreenOpeningData(player: ServerPlayer): List<SlotRef> = layout
         override fun getDisplayName(): Component = Component.translatable("curios.screen")
         override fun createMenu(syncId: Int, inventory: Inventory, player: Player): CuriosMenu =
             CuriosMenu(syncId, inventory, layout)
     })
+    player.containerMenu.carried = carried
+}
+
+private fun backToInventory(player: ServerPlayer) {
+    val menu = player.containerMenu as? CuriosMenu ?: return
+    val carried = menu.carried
+    menu.carried = ItemStack.EMPTY
+    player.doCloseContainer()
+    player.inventoryMenu.carried = carried
 }
 
 private fun tick(player: ServerPlayer) {

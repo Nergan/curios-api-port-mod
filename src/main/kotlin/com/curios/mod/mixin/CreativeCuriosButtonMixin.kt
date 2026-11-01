@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(CreativeModeInventoryScreen::class)
 abstract class CreativeCuriosButtonMixin {
-    @Inject(method = ["method_25426"], at = [At("TAIL")], remap = false)
+    @Inject(method = ["init"], at = [At("TAIL")])
     private fun addCuriosButton(callback: CallbackInfo) {
         (this as Screen).addRenderableWidget(CuriosButton(this as AbstractContainerScreen<*>))
     }

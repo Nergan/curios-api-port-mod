@@ -23,6 +23,10 @@ kotlin {
 
 loom {
     accessWidenerPath = file("src/main/resources/curios.accesswidener")
+    // The Java annotation processor does not see Kotlin mixins; tiny-remapper remaps every mixin in remapJar.
+    mixin {
+        useLegacyMixinAp = false
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
